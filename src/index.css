@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/*
+ * PARADoNext design tokens
+ * Trung tính ấm + 1 màu nhấn cam ("Do Next" = hành động).
+ * Mọi màu đi qua biến CSS nên tự đổi đúng giữa sáng/tối.
+ */
+:root {
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --surface-2: #f3f1ee;
+  --border: #e7e4df;
+  --border-strong: #d6d2cb;
+  --text: #1c1917;
+  --text-muted: #57534e;
+  --text-subtle: #8a847c;
+  --accent: #e8590c;
+  --accent-hover: #d14e08;
+  --accent-fg: #ffffff;
+  --accent-soft: #fff1e8;
+  --success: #2b8a3e;
+  --success-soft: #ebf8ee;
+  --danger: #e03131;
+  --danger-soft: #fff0f0;
+  --warning: #d9480f;
+  --info: #1971c2;
+  --info-soft: #e7f5ff;
+  --yellow: #946800;
+  --yellow-soft: #fbf0c9;
+  --pink: #b8326f;
+  --pink-soft: #fbe4ee;
+  --purple: #7048e8;
+  --purple-soft: #efebfd;
+  /* Màu biểu đồ (1 sắc, đã kiểm tra độ tương phản với nền) */
+  --chart: #e8590c;
+  --ring: rgb(232 89 12 / 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121110;
+    --surface: #1a1917;
+    --surface-2: #242220;
+    --border: #2e2b28;
+    --border-strong: #423e39;
+    --text: #f2efea;
+    --text-muted: #b5afa6;
+    --text-subtle: #857f76;
+    --accent: #ff7a33;
+    --accent-hover: #ff8f52;
+    --accent-fg: #1a0f07;
+    --accent-soft: #2e1c10;
+    --success: #69db7c;
+    --success-soft: #16261a;
+    --danger: #ff6b6b;
+    --danger-soft: #2e1616;
+    --warning: #ffa94d;
+    --info: #74c0fc;
+    --info-soft: #132a3e;
+    --yellow: #ffd866;
+    --yellow-soft: #33290f;
+    --pink: #f78fbd;
+    --pink-soft: #361a27;
+    --purple: #b197fc;
+    --purple-soft: #251d3d;
+    --chart: #e66420;
+    --ring: rgb(255 122 51 / 0.35);
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-yellow: var(--yellow);
+  --color-yellow-soft: var(--yellow-soft);
+  --color-pink: var(--pink);
+  --color-pink-soft: var(--pink-soft);
+  --color-purple: var(--purple);
+  --color-purple-soft: var(--purple-soft);
+  --color-chart: var(--chart);
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+}
