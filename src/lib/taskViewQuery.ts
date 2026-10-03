@@ -201,15 +201,17 @@ export function taskMatchesFilters(task: Task, filters: TaskFilter[]): boolean {
 
 /**
  * Giá trị mặc định khi thêm nhanh task trong 1 view, suy ra từ filter của view:
- * đang ở "Today" thì task mới có hạn hôm nay, "Tomorrow" thì hạn ngày mai...
+ * đang ở "Today" thì task mới có ngày bắt đầu hôm nay, "Tomorrow" thì ngày mai...
  * canAdd = false với view chỉ chứa task đã xong hoặc task quá hạn (thêm vào đó vô nghĩa).
  */
 export function quickAddDefaultsForView(filters: TaskFilter[]): {
   canAdd: boolean
+  start_at: string | null
   due_at: string | null
   /** View lọc đúng 1 giá trị của trường chọn (vd Năng lượng = Quick) → task mới nhận luôn giá trị đó */
   fields: Partial<Record<'energy_level' | 'importance' | 'urgency', string>>
 } {
+  let start_at: string | null = null
   let due_at: string | null = null
   const fields: Partial<Record<'energy_level' | 'importance' | 'urgency', string>> = {}
   for (const f of filters) {
@@ -218,21 +220,28 @@ export function quickAddDefaultsForView(filters: TaskFilter[]): {
       if (typeof one === 'string') fields[f.field] = one
     }
     if (f.field === 'complete' && f.operator === 'eq' && f.value === true) {
-      return { canAdd: false, due_at: null, fields }
+      return { canAdd: false, start_at: null, due_at: null, fields }
     }
-    // View quá hạn (due_at < now): task mới không thể đã quá hạn → không cho thêm
-    if (f.field === 'due_at' && f.value === 'now' && (f.operator === 'lt' || f.operator === 'within')) {
-      return { canAdd: false, due_at: null, fields }
+    // View quá hạn (start_at/due_at < now): task mới không thể đã quá hạn → không cho thêm
+    if ((f.field === 'start_at' || f.field === 'due_at') && f.value === 'now' && (f.operator === 'lt' || f.operator === 'within')) {
+      return { canAdd: false, start_at: null, due_at: null, fields }
     }
     // View khoảng thời gian đã qua (hôm qua, tuần trước, tháng trước): không thêm task mới vào đó
-    if ((f.field === 'due_at' || f.field === 'end_at') && ['yesterday', 'last_week', 'last_month'].includes(String(f.value))) {
-      return { canAdd: false, due_at: null, fields }
+    if ((f.field === 'start_at' || f.field === 'due_at' || f.field === 'end_at') && ['yesterday', 'last_week', 'last_month'].includes(String(f.value))) {
+      return { canAdd: false, start_at: null, due_at: null, fields }
     }
+    // Suy ra start_at mặc định từ filter start_at
+    if (f.field === 'start_at' && typeof f.value === 'string') {
+      const now = new Date()
+      if (f.value === 'today' || f.value === 'this_week' || f.value === 'this_month') start_at = startOfDay(now).toISOString()
+      if (f.value === 'tomorrow') start_at = startOfDay(addDays(now, 1)).toISOString()
+    }
+    // Giữ khả năng suy ra due_at nếu filter dùng due_at
     if (f.field === 'due_at' && typeof f.value === 'string') {
       const now = new Date()
       if (f.value === 'today' || f.value === 'this_week' || f.value === 'this_month') due_at = endOfDay(now).toISOString()
       if (f.value === 'tomorrow') due_at = endOfDay(addDays(now, 1)).toISOString()
     }
   }
-  return { canAdd: true, due_at, fields }
+  return { canAdd: true, start_at, due_at, fields }
 }

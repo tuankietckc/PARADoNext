@@ -762,7 +762,7 @@ function NewTaskRow({
       </td>
       {colCount > 3 && (
         <td colSpan={colCount - 3} className="px-2 text-xs text-subtle">
-          {quick.dueHint && <span className="mr-3 text-sm text-muted">Hạn: {quick.dueHint}</span>}
+          {quick.startHint && <span className="mr-3 text-sm text-muted">Bắt đầu: {quick.startHint}</span>}
           {quick.isPending ? 'Đang lưu…' : 'Esc để huỷ'}
         </td>
       )}
