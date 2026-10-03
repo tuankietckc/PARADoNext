@@ -28,6 +28,14 @@ createRoot(document.getElementById('root')!).render(
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7 }}
+      onSuccess={() => {
+        // Cache đã khôi phục xong → đẩy các mutation offline lên server,
+        // sau đó invalidate toàn bộ query để lấy dữ liệu mới nhất từ Supabase.
+        // Nhờ vậy thay đổi trên iPhone sẽ hiện ngay trên máy tính khi reload.
+        queryClient.resumePausedMutations().then(() => {
+          queryClient.invalidateQueries()
+        })
+      }}
     >
       <BrowserRouter>
         <App />
