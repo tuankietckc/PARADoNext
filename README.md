@@ -933,11 +933,36 @@ Trang Review có 2 tab: **Tổng quan tuần** (mặc định) và **Sổ review
 
 **Bộ lọc ngày mới** dùng được cho mọi view Task, kể cả trang Tasks, cho các trường Hạn, Bắt đầu, Kết thúc: Hôm qua · Tuần trước · Tháng này · Tháng trước. View lọc theo khoảng thời gian đã qua (hôm qua, tuần trước, tháng trước) thì không cho thêm task nhanh.
 
+### 9.35. PWA, Offline Cache & Đồng bộ dữ liệu tức thì giữa các thiết bị
+
+- **Progressive Web App (PWA):** Tích hợp `vite-plugin-pwa`, hỗ trợ cài đặt app lên màn hình chính điện thoại (iOS/Android) hoặc máy tính (Desktop PWA) hoạt động độc lập như native app.
+- **Offline Cache (IndexedDB):** Sử dụng `PersistQueryClientProvider` kết hợp `idb-keyval` để lưu trữ toàn bộ trạng thái query vào IndexedDB cục bộ, giúp mở app tức thì không cần chờ mạng và xem lại dữ liệu khi mất kết nối.
+- **Đồng bộ đa thiết bị (Cross-device sync):**
+  - Khắc phục triệt để vấn đề dữ liệu cũ khi chuyển đổi qua lại giữa các thiết bị (ví dụ: tick xong việc trên iPhone, mở máy tính lên bị hiển thị cache cũ).
+  - Ngay sau khi hydration xong từ IndexedDB (`onSuccess` trong [`main.tsx`](file:///d:/ProjectCode/PARADoNext/src/main.tsx)), hệ thống kích hoạt tiếp tục các mutation chưa gửi rồi tự động `invalidateQueries()` để fetch dữ liệu mới nhất từ Supabase.
+- **Triển khai Cloudflare Pages:** Tích hợp `wrangler.jsonc` cấu hình native Single Page Application (SPA) routing.
+
+### 9.36. Chuyển các View Task sang tính theo Ngày Bắt Đầu (`start_at`)
+
+Migration `0022_views_use_start_at.sql` chuẩn hoá toàn bộ các view hiển thị theo ngày bắt đầu thực hiện:
+- **Tasks today** (mục ✅ Tasks List): Lọc các task chưa xong (`complete = false`) và ngày bắt đầu là hôm nay (`start_at = today`), sắp xếp theo độ quan trọng từ cao → thấp.
+- **Tasks to context** (mục ✅ Tasks List): Lọc các task chưa xong có ngày bắt đầu là hôm nay (`complete = false` AND `start_at = today`), **nhóm theo Area** và sắp xếp theo độ quan trọng.
+- **Tomorrow** (mục ✅ Tasks List): Lọc các task chưa xong có ngày bắt đầu là ngày mai (`start_at = tomorrow`).
+- **Today / Tomorrow / This Week / Week's Tasks / Monthly tasks** (mục Work Schedule & Work Summary): Toàn bộ chuyển sang lọc và nhóm theo `start_at` (ngày bắt đầu) thay vì `due_at` (hạn chót).
+- **Overdue (Quá hạn):** Giữ nguyên lọc theo `due_at` (hạn chót) để cảnh báo những công việc đã trễ deadline.
+- **Thêm nhanh task:** Hàm `quickAddDefaultsForView` và hook `useQuickCreate` đồng bộ tự động gán ngày bắt đầu (`start_at`) tương ứng với view đang đứng (hôm nay, ngày mai, tuần này...).
+
+### 9.37. Bổ sung loại tài nguyên Music cho Resources
+
+Migration `0021_resources_music_kind.sql`:
+- Bổ sung giá trị `music` vào ràng buộc `kind` trong bảng `resources` (`video`, `book`, `article`, `course`, `music`, `other`).
+- Cho phép lưu trữ, phân loại và lọc các album, bài hát, playlist âm nhạc tập trung trong hệ thống PARA Resources.
+
 ### 9.3. Trạng thái hiện tại
 
 | Phần | Trạng thái |
 |---|---|
-| Schema Supabase (`supabase/migrations/`) | ✅ Đã viết (0001 → 0020), cần tự chạy trong SQL Editor theo thứ tự |
+| Schema Supabase (`supabase/migrations/`) | ✅ Đã viết (0001 → 0022), cần tự chạy trong SQL Editor theo thứ tự |
 | Kết nối Supabase qua Settings UI | ✅ Xong |
 | Auth (đăng nhập/đăng ký) | ✅ Xong (email/password) |
 | Task View query engine | ✅ Xong, đọc được dữ liệu thật |
@@ -974,6 +999,9 @@ Trang Review có 2 tab: **Tổng quan tuần** (mặc định) và **Sổ review
 | Task lặp trên server (pg_cron) · Channel Telegram nhắc việc | ✅ Xong (xem 9.32) |
 | Habits · Weekly Review · Stats | ✅ Xong (xem 9.33) |
 | Review: Tổng quan tuần (view Task/Project, thói quen, ghi chú) | ✅ Xong (xem 9.34) |
+| PWA, Offline Cache & Đồng bộ tức thì đa thiết bị | ✅ Xong (xem 9.35) |
+| Chuyển Task Views sang lọc theo Ngày bắt đầu (start_at) | ✅ Xong (xem 9.36) |
+| Bổ sung loại tài nguyên Music | ✅ Xong (xem 9.37) |
 
 ---
 
@@ -988,3 +1016,4 @@ Trang Review có 2 tab: **Tổng quan tuần** (mặc định) và **Sổ review
 7. Định nghĩa cụ thể hành vi "Quick Start" và "Focus" (mục 5.2, 5.4), thiết kế prompt AI
 8. ~~Dựng Projects/Areas/Resources CRUD~~ ✅
 9. ~~Drag & Drop~~ ✅
+
