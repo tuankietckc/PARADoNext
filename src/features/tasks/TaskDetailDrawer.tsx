@@ -5,7 +5,8 @@ import { format } from 'date-fns'
 import type { Energy, RepeatRule, Task } from '../../lib/taskViewTypes'
 import { RepeatField } from './RepeatPicker'
 import { useCreateTask, useDeleteTask, useDuplicateTasks, useUpdateTask, type TaskDraft } from './useTaskMutations'
-import { Button, Field, Notice, Segmented, Tag, Textarea, cx } from '../../components/ui'
+import { Button, Field, Notice, Segmented, Tag, cx } from '../../components/ui'
+import { RichEditor } from '../../components/RichEditor'
 import { RelationCell } from './cells'
 import { DateField } from './DatePicker'
 import {
@@ -31,7 +32,7 @@ type FormValues = {
   state: Task['state']
   project_id: string | null
   area_id: string | null
-  notes: string
+  notes: string | null
   repeat_rule: RepeatRule | null
   remind_at: string | null
 }
@@ -57,7 +58,7 @@ function toFormValues(task: Task | undefined, defaults: TaskDraft | undefined): 
     state: src.complete ? 'done' : (src.state ?? 'not_started'),
     project_id: src.project_id ?? null,
     area_id: src.area_id ?? null,
-    notes: src.notes ?? '',
+    notes: src.notes ?? null,
     repeat_rule: src.repeat_rule ?? null,
     remind_at: src.remind_at ?? null,
   }
@@ -151,7 +152,7 @@ export function TaskDetailDrawer({
       complete: values.state === 'done',
       project_id: values.project_id,
       area_id: values.area_id,
-      notes: values.notes.trim() || null,
+      notes: values.notes || null,
     }
     // Chỉ gửi "Lặp lại" khi có đổi (database chưa chạy migration 0016 vẫn lưu được task)
     if (dirtyFields.repeat_rule || (isCreate && values.repeat_rule)) patch.repeat_rule = values.repeat_rule
@@ -350,8 +351,12 @@ export function TaskDetailDrawer({
             </Field>
           </div>
 
-          <Field label="Ghi chú">
-            <Textarea placeholder="Bước đầu tiên là gì?…" {...register('notes')} />
+          <Field label="Ghi chú" group>
+            <RichEditor
+              value={watch('notes')}
+              onChange={(v) => setField('notes', v)}
+              placeholder="Bước đầu tiên là gì?…"
+            />
           </Field>
 
           {error && <Notice tone="danger">{error}</Notice>}
