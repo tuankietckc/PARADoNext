@@ -6,6 +6,7 @@ import { BookOpen, CheckSquare, Copy, LoaderCircle, Pencil, Plus, RotateCcw, Sea
 import { AnchoredPopover, usePopoverAnchor } from '../../components/Popover'
 import { Button, Notice, SelectBox, Tag, cx } from '../../components/ui'
 import { normalizeSearch } from '../tasks/taskFields'
+import { extractPlainText } from '../../components/RichEditor'
 import { useParaList } from '../para/usePara'
 import { useUiPref } from '../../lib/useUiPref'
 import { TopicTags } from '../notes/topics'
@@ -117,7 +118,7 @@ export function ResourcesPage() {
     const q = normalizeSearch(query.trim())
     const list = live
       .filter((r) => cfg.filters.every((f) => matchFilter(r, f)))
-      .filter((r) => !q || normalizeSearch([r.title, r.creator ?? '', r.url ?? '', r.topics.join(' ')].join(' ')).includes(q))
+      .filter((r) => !q || normalizeSearch([r.title, r.creator ?? '', r.url ?? '', r.topics.join(' '), extractPlainText(r.content)].join(' ')).includes(q))
     return sortRows(list, cfg)
   }, [live, cfg, query])
 

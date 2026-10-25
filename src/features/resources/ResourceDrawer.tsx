@@ -3,6 +3,7 @@ import { endOfDay, format } from 'date-fns'
 import { Archive, ArchiveRestore, ExternalLink, ListPlus, Star, Trash2, X } from 'lucide-react'
 import { TaskDetailDrawer } from '../tasks/TaskDetailDrawer'
 import { Button, Field, Notice, SelectBox, cx } from '../../components/ui'
+import { RichEditor } from '../../components/RichEditor'
 import { RelationCell } from '../tasks/cells'
 import { TopicsCell } from '../notes/topics'
 import { kindOptions } from './resourceFields'
@@ -48,7 +49,6 @@ export function ResourceDrawer({ resource, defaults, onClose }: { resource?: Res
   const create = useCreateResource()
   const update = useUpdateResource()
   const del = useDeleteResource()
-  const contentRef = useRef<HTMLTextAreaElement>(null)
   const kindTouched = useRef(!isCreate || !!defaults?.kind)
   const set = <K extends keyof Values>(k: K, v: Values[K]) => setValues((p) => ({ ...p, [k]: v }))
 
@@ -63,12 +63,6 @@ export function ResourceDrawer({ resource, defaults, onClose }: { resource?: Res
     }
   }, [onClose])
 
-  useEffect(() => {
-    const el = contentRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${Math.max(el.scrollHeight, 160)}px`
-  }, [values.content])
 
   const toDraft = (): ResourceDraft => {
     const n = Number(values.minutes.replace(',', '.'))
@@ -83,7 +77,7 @@ export function ResourceDrawer({ resource, defaults, onClose }: { resource?: Res
       area_id: values.area_id,
       project_id: values.project_id,
       topics: values.topics,
-      content: values.content.trim() || null,
+      content: values.content || null,
     }
   }
 
@@ -132,7 +126,7 @@ export function ResourceDrawer({ resource, defaults, onClose }: { resource?: Res
       <TaskDetailDrawer
         defaults={{
           task_name: `${verb}: ${values.title.trim()}`,
-          notes: [values.url.trim(), values.content.trim()].filter(Boolean).join('\n\n') || null,
+          notes: values.content || values.url.trim() || null,
           area_id: values.area_id,
           project_id: values.project_id,
           due_at: endOfDay(new Date()).toISOString(),
@@ -277,14 +271,14 @@ export function ResourceDrawer({ resource, defaults, onClose }: { resource?: Res
             </p>
           )}
 
-          <textarea
-            ref={contentRef}
-            value={values.content}
-            onChange={(e) => set('content', e.target.value)}
-            placeholder="Ghi chú, tóm tắt, điều rút ra…"
-            aria-label="Ghi chú tài nguyên"
-            className="w-full resize-none border-t border-line bg-transparent pt-4 text-[15px] leading-relaxed text-fg outline-none placeholder:text-subtle"
-          />
+          <Field label="Ghi chú & Tóm tắt" group>
+            <RichEditor
+              value={values.content}
+              onChange={(v) => set('content', v ?? '')}
+              placeholder="Ghi chú, tóm tắt, điều rút ra…"
+              minHeight={200}
+            />
+          </Field>
 
           {error && <Notice tone="danger">{error}</Notice>}
         </div>

@@ -20,6 +20,7 @@ import {
 import { Button, Card, Notice, cx } from '../../components/ui'
 import { RelationCell, RelationValue } from '../tasks/cells'
 import { normalizeSearch } from '../tasks/taskFields'
+import { extractPlainText } from '../../components/RichEditor'
 import { NoteDrawer } from './NoteDrawer'
 import { QuickNoteBox } from './QuickNote'
 import { TopicTags, TopicsCell } from './topics'
@@ -61,7 +62,7 @@ export function NotesPage() {
     return (notes ?? []).filter(
       (n) =>
         (!topicFilter || n.topics.includes(topicFilter)) &&
-        (!q || normalizeSearch(`${n.title} ${n.content ?? ''} ${n.topics.join(' ')}`).includes(q)),
+        (!q || normalizeSearch(`${n.title} ${extractPlainText(n.content)} ${n.topics.join(' ')}`).includes(q)),
     )
   }, [notes, query, topicFilter])
 
@@ -180,7 +181,7 @@ export function NotesPage() {
                         >
                           <FileText size={15} className="shrink-0 text-subtle" />
                           <span className="min-w-0 flex-1 font-medium text-fg">{n.title || 'Chưa đặt tên'}</span>
-                          {n.content && <span className="hidden max-w-[40%] truncate text-xs text-subtle lg:inline">{n.content.split('\n')[0]}</span>}
+                          {n.content && <span className="hidden max-w-[40%] truncate text-xs text-subtle lg:inline">{extractPlainText(n.content)}</span>}
                           <PanelRightOpen size={13} className="shrink-0 text-subtle opacity-0 group-hover/row:opacity-100" />
                         </button>
                       </td>

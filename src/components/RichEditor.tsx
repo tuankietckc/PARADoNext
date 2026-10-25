@@ -62,6 +62,29 @@ function isEmpty(editor: Editor | null) {
   return editor.isEmpty
 }
 
+/** Trích xuất text thuần từ chuỗi JSON Tiptap hoặc plain text cũ để tìm kiếm và hiển thị tóm tắt. */
+export function extractPlainText(value: string | null | undefined): string {
+  if (!value) return ''
+  try {
+    const parsed = JSON.parse(value)
+    if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
+      const texts: string[] = []
+      const walk = (node: { text?: string; content?: unknown[] }) => {
+        if (!node) return
+        if (node.text) texts.push(node.text)
+        if (Array.isArray(node.content)) {
+          for (const child of node.content) walk(child as { text?: string; content?: unknown[] })
+        }
+      }
+      walk(parsed)
+      return texts.join(' ').trim()
+    }
+  } catch {
+    // Không phải JSON, là plain text thông thường
+  }
+  return value
+}
+
 // ---------------------------------------------------------------------------
 // Toolbar button
 // ---------------------------------------------------------------------------

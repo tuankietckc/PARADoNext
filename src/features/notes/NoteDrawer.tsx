@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { Archive, ArchiveRestore, ListPlus, Trash2, X } from 'lucide-react'
 import { endOfDay } from 'date-fns'
 import { TaskDetailDrawer } from '../tasks/TaskDetailDrawer'
 import { Button, Field, Notice } from '../../components/ui'
+import { RichEditor } from '../../components/RichEditor'
 import { RelationCell } from '../tasks/cells'
 import { TopicsCell } from './topics'
 import { useCreateNote, useDeleteNote, useUpdateNote, type Note, type NoteDraft } from './useNotes'
@@ -29,7 +30,6 @@ export function NoteDrawer({ note, onClose }: { note?: Note; onClose: () => void
   const createNote = useCreateNote()
   const updateNote = useUpdateNote()
   const deleteNote = useDeleteNote()
-  const contentRef = useRef<HTMLTextAreaElement>(null)
   const set = <K extends keyof Values>(k: K, v: Values[K]) => setValues((p) => ({ ...p, [k]: v }))
 
   useEffect(() => {
@@ -43,14 +43,6 @@ export function NoteDrawer({ note, onClose }: { note?: Note; onClose: () => void
     }
   }, [onClose])
 
-  // Nội dung tự cao theo chữ
-  useEffect(() => {
-    const el = contentRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${Math.max(el.scrollHeight, 220)}px`
-  }, [values.content])
-
   async function save() {
     const title = values.title.trim()
     if (!title) {
@@ -58,7 +50,7 @@ export function NoteDrawer({ note, onClose }: { note?: Note; onClose: () => void
       return
     }
     setError(null)
-    const patch: NoteDraft = { ...values, title, content: values.content.trim() || null }
+    const patch: NoteDraft = { ...values, title, content: values.content || null }
     try {
       if (isCreate) await createNote.mutateAsync({ ...patch, title })
       else await updateNote.mutateAsync({ id: note.id, patch })
@@ -164,14 +156,14 @@ export function NoteDrawer({ note, onClose }: { note?: Note; onClose: () => void
             </p>
           )}
 
-          <textarea
-            ref={contentRef}
-            value={values.content}
-            onChange={(e) => set('content', e.target.value)}
-            placeholder="Viết nội dung ghi chú…"
-            aria-label="Nội dung ghi chú"
-            className="w-full resize-none border-t border-line bg-transparent pt-4 text-[15px] leading-relaxed text-fg outline-none placeholder:text-subtle"
-          />
+          <Field label="Nội dung" group>
+            <RichEditor
+              value={values.content}
+              onChange={(v) => set('content', v ?? '')}
+              placeholder="Viết nội dung ghi chú…"
+              minHeight={280}
+            />
+          </Field>
 
           {error && <Notice tone="danger">{error}</Notice>}
         </div>
